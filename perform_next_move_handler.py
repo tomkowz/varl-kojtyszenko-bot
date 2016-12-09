@@ -46,6 +46,8 @@ class PerformNextMoveHandler(tornado.web.RequestHandler):
         battlefieldInfo = BattlefieldInfo(bot, tiles, opponents, bombs, missiles, config)
         nextMove = NextMove(gameInfo, battlefieldInfo)
         botMove = nextMove.calculate()
+        print '------'
+        battlefieldInfo.print_board()
         print '>>>>>>'
 
         response = BotMoveEncoder.encode(botMove)
