@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from board_tile_type import BoardTileType
+
 class BattlefieldInfo:
 
     def __init__(self, bot=None, tiles=None, opponents=None, bombs=None, missiles=None, config=None):
@@ -16,22 +18,23 @@ class BattlefieldInfo:
        
         # Collect tiles
         for tile in self.tiles:
-            items[tile.location.x][tile.location.y] = '{}'.format(tile.tileType)
+            if tile.tileType != BoardTileType.Empty:
+                items[tile.location.x][tile.location.y] = tile.tileType
 
         # Collect bot
-        items[self.bot.location.x][self.bot.location.y] = 'b'
+        items[self.bot.location.x][self.bot.location.y] = '×'
 
         # Collect opponents
         for opponent in self.opponents:
-            items[opponent.location.x][opponent.location.y] = 'o'
+            items[opponent.location.x][opponent.location.y] = '■'
 
         # Collect bombs
         for bomb in self.bombs:
-            items[bomb.location.x][bomb.location.y] = '⨂'
+            items[bomb.location.x][bomb.location.y] = 'b'
 
         # Collect missiles
         for missile in self.missiles:
-            items[missile.location.x][missile.location.y] = '⨀'
+            items[missile.location.x][missile.location.y] = 'm'
 
         # Draw board
         for i in range(0, self.config.mapWidth):

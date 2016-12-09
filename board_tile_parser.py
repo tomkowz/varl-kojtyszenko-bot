@@ -8,12 +8,17 @@ class BoardTileParser:
     @staticmethod
     def get_tiles(data):
         tiles = []
-        for tileData in data['Board']:
-            location = Location(tileData[0], tileData[1])
-            tileType = tileData[2]
+        boardData = data['Board']
+        rows = len(boardData)
+        cols = len(boardData[0])
 
-            tile = BoardTile(location, tileType)
-            tile.print_debug()
-            tiles.append(tile)
+        for x in range(0, rows):
+            for y in range(0, cols):
+                location = Location(x, y)
+                tileType = boardData[x][y];
+
+                tile = BoardTile(location, tileType)
+                tile.print_debug()
+                tiles.append(tile)
 
         return tiles
