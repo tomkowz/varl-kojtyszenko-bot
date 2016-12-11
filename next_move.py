@@ -27,24 +27,29 @@ class NextMove:
 
         moveDirection = MoveDirection.NoMove
         action = BotAction.NoAction
+        fireDirection = MoveDirection.NoMove
 
         # Calculate move direction based on first step of a shortest path to opponent
         if pathToOpponent is not None:
-            moveDirection = self._calculate_move_direction(self.battlefieldInfo.bot.location, pathToOpponent[0])
+            moveDirection = self._get_move_direction(self.battlefieldInfo.bot.location, pathToOpponent[0])
+
+            # Check whether way to opponent is a straight line (for new step) without any obstacles.
+            # If that's true then make fire a missile.
+            if self._is_straight_line(pathToOpponent):
+                action = BotAction.FireMissile
+                fireDirection = self._get_fire_direction(pathToOpponent)
 
             # Plant a bomb if bot is close to Opponent
             # Close mean in range of a bomb that bot can plant
             if len(pathToOpponent) <= self.battlefieldInfo.config.bombBlastRadius:
                 action = BotAction.DropBomb
 
-        fireDirection = self._calculate_fire_direction()
-
         botMove = BotMove(moveDirection, action, fireDirection)
         
         botMove.print_debug()
         return botMove
 
-    def _calculate_move_direction(self, botLocation, nextLocation):
+    def _get_move_direction(self, botLocation, nextLocation):
         if botLocation.x + 1 == nextLocation.x:
             return MoveDirection.Right
         elif botLocation.x - 1 == nextLocation.x:
@@ -56,12 +61,46 @@ class NextMove:
         else:
             return MoveDirection.NoMove
 
-    def _calculate_fire_direction(self):
-        return random.choice([
-            MoveDirection.NoMove, 
-            MoveDirection.Up, 
-            MoveDirection.Down, 
-            MoveDirection.Right, 
-            MoveDirection.Left
-            ])
-    
+    def _get_fire_direction(self, path):
+        start = path[0]
+        end = path[-1]
+
+        if start.x < end.x:
+            return MoveDirection.Right
+        elif start.x > end.x:
+            return MoveDirection.Left
+        elif start.y < end.y:
+            return MoveDirection.Down
+        elif start.y > end.y:
+            return MoveDirection.Up
+        else:
+            return MoveDirection.NoMove        
+
+    def _is_straight_line(self, path):
+        start = path[0]
+        end = path[-1]
+
+        isStraight = True
+        current = path[0]
+        for element in path:
+            if current.x == element.x:
+                current = element
+            else:
+                isStraight = False
+                break
+
+        if isStraight == True:
+            return True
+
+        current = path[0]
+        for element in path:
+            if current.y == element.y:
+                current = element
+            else:
+                isStraight = False
+                break
+
+        if isStraight == True:
+            return True
+        else:
+            return False
