@@ -32,17 +32,17 @@ class NodeMetadata:
         self.isMissile = False
         self.isShortestPath = False
 
-    def markBomb(self):
+    def markBomb(self, isAvailable):
         self.isBomb = True
         self.isMissile = False
         self.isShortestPath = False
-        self.isAvailable = False
+        self.isAvailable = isAvailable
 
-    def markMissile(self):
+    def markMissile(self, isAvailable):
         self.isMissile = True
         self.isBomb = False
         self.isShortestPath = False
-        self.isAvailable = False
+        self.isAvailable = isAvailable
 
     def markShortestPath(self):
         self.isShortestPath = True
@@ -58,10 +58,10 @@ class NodeMetadata:
 
 class AStar:
     
-    def __init__(self, battlefieldInfo):
+    def __init__(self, battlefieldInfo, endLocation):
         self.battlefieldInfo = battlefieldInfo
         self.startLocation = battlefieldInfo.bot.location
-        self.endLocation = battlefieldInfo.opponents[0].location
+        self.endLocation = endLocation
         self.mapWidth = battlefieldInfo.config.mapWidth
         self.mapHeight = battlefieldInfo.config.mapHeight
         self.nodes = []
@@ -117,13 +117,13 @@ class AStar:
             # Remove None nodes, not available and visited ones
             adjacents = filter(lambda x: x is not None, adjacents)
 
-            print 'Found adjacents:',
-            for adjacent in adjacents:
-                print '({}, {}, {})'.format(adjacent.location.x, adjacent.location.y, adjacent.metadata.isAvailable),
+            # print 'Found adjacents:',
+            # for adjacent in adjacents:
+            #     print '({}, {}, {})'.format(adjacent.location.x, adjacent.location.y, adjacent.metadata.isAvailable),
 
-                if adjacent.metadata.isAvailable == False:
-                    print 'b: {}, m: {}'.format(adjacent.metadata.isBomb, adjacent.metadata.isMissile)
-            print ''
+            #     if adjacent.metadata.isAvailable == False:
+            #         print 'b: {}, m: {}'.format(adjacent.metadata.isBomb, adjacent.metadata.isMissile)
+            # print ''
 
             adjacents = filter(lambda x: x.metadata.isAvailable == True, adjacents)
             adjacents = filter(lambda x: x not in visited, adjacents)
@@ -146,8 +146,8 @@ class AStar:
                         adjacent.h = distance    
                         adjacent.parent = currentNode
 
-                print 'cn: ({}, {}), adj: ({}, {})'.format(currentNode.location.x, currentNode.location.y,
-                    adjacent.location.x, adjacent.location.y)
+                # print 'cn: ({}, {}), adj: ({}, {})'.format(currentNode.location.x, currentNode.location.y,
+                    # adjacent.location.x, adjacent.location.y)
 
             # Remove selected node from unvisited
             unvisited.remove(currentNode)
@@ -197,9 +197,14 @@ class AStar:
             radius = bomb.explosionRadius
 
             node = self.nodes[bomb.location.x][bomb.location.y]
-            node.metadata.markBomb()
+            node.metadata.markBomb(isAvailable=False)
 
-            for offset in range(0, radius + 1):
+            # Mark unavailable fields based on radius and number of rounds until it explodes.
+            # Bot can go through the range of the bomb if it has a time to run away before it explodes.
+            # Every round the range will increase so bot has less chance to be in a bomb range.
+            offsetMax = max(0, (radius - (bomb.roundsUntilExplodes - 2)) + 1)
+
+            for offset in range(0, offsetMax):
                 explodingNodes = [
                     self.nodes[max(0, bomb.location.x - offset)][bomb.location.y],
                     self.nodes[min(bomb.location.x + offset, self.mapWidth - 1)][bomb.location.y],
@@ -208,49 +213,59 @@ class AStar:
                 ]
                 
                 for explodingNode in explodingNodes:
-                    explodingNode.metadata.markBomb()
+                    explodingNode.metadata.markBomb(isAvailable=False)
 
     def _add_missiles(self):
-            for missile in self.battlefieldInfo.missiles:
-                radius = missile.explosionRadius
+        for missile in self.battlefieldInfo.missiles:
+            radius = missile.explosionRadius
 
-                node = self.nodes[missile.location.x][missile.location.y]
+            node = self.nodes[missile.location.x][missile.location.y]
 
-                if missile.moveDirection == MoveDirection.Up:
-                    vector = (0, -1)
+            if missile.moveDirection == MoveDirection.Up:
+                vector = (0, -1)
 
-                elif missile.moveDirection == MoveDirection.Right:
-                    vector = (1, 0)
+            elif missile.moveDirection == MoveDirection.Right:
+                vector = (1, 0)
 
-                elif missile.moveDirection == MoveDirection.Down:
-                    vector = (0, 1)
+            elif missile.moveDirection == MoveDirection.Down:
+                vector = (0, 1)
 
-                elif missile.moveDirection == MoveDirection.Left:
-                    vector = (-1, 0)
+            elif missile.moveDirection == MoveDirection.Left:
+                vector = (-1, 0)
 
-                # Go through nodes untill inavailable node is found so it means
-                # that's the target of a missile
+            # Go through nodes untill inavailable node is found so it means
+            # that's the target of a missile
+            location = node.location
 
-                location = node.location
+            while self.nodes[location.x][location.y].metadata.isAvailable == True:
+                # The trajectory of missile is available to go through
+                self.nodes[location.x][location.y].metadata.markMissile(isAvailable=False)
 
-                while self.nodes[location.x][location.y].metadata.isAvailable == True:
-                    self.nodes[location.x][location.y].metadata.markMissile()
+                col = max(0, min(location.x + vector[0], self.mapWidth - 1))
+                row = max(0, min(location.y + vector[1], self.mapHeight - 1))
 
-                    col = max(0, min(location.x + vector[0], self.mapWidth - 1))
-                    row = max(0, min(location.y + vector[1], self.mapHeight - 1))
-                    location = Location(col, row)
+                if ((row == 0 and vector[1] == -1) or 
+                    (row == self.mapHeight - 1 and vector[1] == 1) or 
+                    (col == 0 and vector[0] == -1) or 
+                    (col == self.mapWidth - 1 and vector[0] == 1)):
+                        self.nodes[location.x][location.y].metadata.markMissile(isAvailable=False)
 
-                # Mark missile explosion
-                for offset in range(0, radius + 1):
-                    explodingNodes = [
-                        self.nodes[max(0, location.x - offset)][location.y],
-                        self.nodes[min(location.x + offset, self.mapWidth - 1)][location.y],
-                        self.nodes[location.x][max(0, location.y - offset)],
-                        self.nodes[location.x][min(location.y + offset, self.mapHeight - 1)]
-                    ]
+                location = Location(col, row)
 
-                    for explodingNode in explodingNodes:
-                        explodingNode.metadata.markMissile()
+            # mark missile position as unavailable
+            self.nodes[missile.location.x][missile.location.y].metadata.markMissile(isAvailable=False)
+
+            # Mark missile explosion
+            for offset in range(0, radius + 1):
+                explodingNodes = [
+                    self.nodes[max(0, location.x - offset)][location.y],
+                    self.nodes[min(location.x + offset, self.mapWidth - 1)][location.y],
+                    self.nodes[location.x][max(0, location.y - offset)],
+                    self.nodes[location.x][min(location.y + offset, self.mapHeight - 1)]
+                ]
+
+                for explodingNode in explodingNodes:
+                    explodingNode.metadata.markMissile(isAvailable=False)
 
     def _add_shortest_path(self, path):
         for location in path:

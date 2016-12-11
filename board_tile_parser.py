@@ -14,6 +14,6 @@ class BoardTileParser:
                 location = Location(col, row)
                 tileType = data['Board'][row][col]
                 tile = BoardTile(location, tileType)
-                tile.print_debug()
+                # tile.print_debug()
                 tiles.append(tile)
         return tiles 

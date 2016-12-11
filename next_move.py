@@ -20,11 +20,23 @@ class NextMove:
         self.battlefieldInfo = battlefieldInfo
 
     def calculate(self):
-        astar = AStar(self.battlefieldInfo)
-        astar.get_path()
+        # Find path to opponent
+        endLocation = self.battlefieldInfo.opponents[0].location
+        astar = AStar(self.battlefieldInfo, endLocation)
+        pathToOpponent = astar.get_path()
 
-        moveDirection = self._calculate_move_direction()
-        action = self._calculate_action()
+        moveDirection = MoveDirection.NoMove
+        action = BotAction.NoAction
+
+        # Calculate move direction based on first step of a shortest path to opponent
+        if pathToOpponent is not None:
+            moveDirection = self._calculate_move_direction(self.battlefieldInfo.bot.location, pathToOpponent[0])
+
+            # Plant a bomb if bot is close to Opponent
+            # Close mean in range of a bomb that bot can plant
+            if len(pathToOpponent) <= self.battlefieldInfo.config.bombBlastRadius:
+                action = BotAction.DropBomb
+
         fireDirection = self._calculate_fire_direction()
 
         botMove = BotMove(moveDirection, action, fireDirection)
@@ -32,21 +44,17 @@ class NextMove:
         botMove.print_debug()
         return botMove
 
-    def _calculate_move_direction(self):
-        return random.choice([
-            MoveDirection.NoMove, 
-            MoveDirection.Up, 
-            MoveDirection.Down, 
-            MoveDirection.Right, 
-            MoveDirection.Left
-            ])
-
-    def _calculate_action(self):
-        options = [BotAction.NoAction, BotAction.DropBomb]
-        if self.battlefieldInfo.bot.isMissileAvailable is True:
-            options.append(BotAction.FireMissile)
-
-        return random.choice(options)
+    def _calculate_move_direction(self, botLocation, nextLocation):
+        if botLocation.x + 1 == nextLocation.x:
+            return MoveDirection.Right
+        elif botLocation.x - 1 == nextLocation.x:
+            return MoveDirection.Left
+        elif botLocation.y - 1 == nextLocation.y:
+            return MoveDirection.Up
+        elif botLocation.y + 1 == nextLocation.y:
+            return MoveDirection.Down
+        else:
+            return MoveDirection.NoMove
 
     def _calculate_fire_direction(self):
         return random.choice([
