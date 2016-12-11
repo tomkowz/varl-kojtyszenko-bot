@@ -14,7 +14,7 @@ class BattlefieldInfo:
         self.config = config
 
     def print_board(self):
-        items = [['·' for i in range(0, self.config.mapWidth)] for i in range(0, self.config.mapHeight)]
+        items = [['·' for col in range(0, self.config.mapWidth)] for row in range(0, self.config.mapHeight)]
        
         # Collect tiles
         for tile in self.tiles:
@@ -37,8 +37,8 @@ class BattlefieldInfo:
             items[missile.location.x][missile.location.y] = 'm'
 
         # Draw board
-        for i in range(0, self.config.mapWidth):
-            for j in range(0, self.config.mapHeight):
-                print items[i][j],
+        for col in range(0, self.config.mapWidth):
+            for row in range(0, self.config.mapHeight):
+                print items[row][col],
             print ''
         

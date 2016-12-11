@@ -1,5 +1,6 @@
 import random
 
+from astar import AStar
 from battlefield_info import BattlefieldInfo
 from board_tile import BoardTile
 from bomb import Bomb
@@ -19,6 +20,9 @@ class NextMove:
         self.battlefieldInfo = battlefieldInfo
 
     def calculate(self):
+        astar = AStar(self.battlefieldInfo)
+        astar.get_path()
+
         moveDirection = self._calculate_move_direction()
         action = self._calculate_action()
         fireDirection = self._calculate_fire_direction()
@@ -46,6 +50,7 @@ class NextMove:
 
     def _calculate_fire_direction(self):
         return random.choice([
+            MoveDirection.NoMove, 
             MoveDirection.Up, 
             MoveDirection.Down, 
             MoveDirection.Right, 

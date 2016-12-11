@@ -35,13 +35,13 @@ class PerformNextMoveHandler(tornado.web.RequestHandler):
         print '<<<<<<'
         data = json.loads(self.request.body)
 
+        config = GameConfigParser.get_config(data)
         gameInfo = GameInfoParser.get_info(data)
         bot = BotParser.get_bot(data)
-        tiles = BoardTileParser.get_tiles(data)
+        tiles = BoardTileParser.get_tiles(data, config.mapWidth, config.mapHeight)
         opponents = OpponentParser.get_opponents(data)
         bombs = BombParser.get_bombs(data)
         missiles = MissileParser.get_missiles(data)
-        config = GameConfigParser.get_config(data)
 
         battlefieldInfo = BattlefieldInfo(bot, tiles, opponents, bombs, missiles, config)
         nextMove = NextMove(gameInfo, battlefieldInfo)

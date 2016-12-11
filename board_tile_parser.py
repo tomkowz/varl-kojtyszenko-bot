@@ -6,19 +6,14 @@ from location import Location
 class BoardTileParser:
 
     @staticmethod
-    def get_tiles(data):
+    def get_tiles(data, mapWidth, mapHeight):
         tiles = []
-        boardData = data['Board']
-        rows = len(boardData)
-        cols = len(boardData[0])
 
-        for x in range(0, rows):
-            for y in range(0, cols):
-                location = Location(x, y)
-                tileType = boardData[x][y];
-
+        for col in range(0, mapWidth):
+            for row in range(0, mapHeight):
+                location = Location(col, row)
+                tileType = data['Board'][row][col]
                 tile = BoardTile(location, tileType)
                 tile.print_debug()
                 tiles.append(tile)
-
-        return tiles
+        return tiles 
