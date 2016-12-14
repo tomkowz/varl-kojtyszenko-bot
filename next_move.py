@@ -63,7 +63,7 @@ class NextMove:
                 didAction = False
                 # Check whether way to opponent is a straight line (for new step) without any obstacles.
                 # If that's true then make fire a missile.
-                if self._is_straight_line(pathToFollow):
+                if self._is_straight_line(pathToFollow) and len(pathToFollow):
                     action = BotAction.FireMissile
                     fireDirection = self._get_fire_direction(pathToFollow)
                     didAction = True

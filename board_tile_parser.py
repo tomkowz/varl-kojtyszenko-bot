@@ -12,7 +12,7 @@ class BoardTileParser:
         for col in range(0, mapWidth):
             for row in range(0, mapHeight):
                 location = Location(col, row)
-                tileType = data['Board'][row][col]
+                tileType = data['Board'][col][row]
                 tile = BoardTile(location, tileType)
                 # tile.print_debug()
                 tiles.append(tile)

@@ -69,6 +69,7 @@ class AStar:
     def get_path(self):
         # Create nodes that represent every field on the board
         self.nodes = []
+        
         for col in range(0, self.mapWidth):
             nodesInRow = []
             for row in range(0, self.mapHeight):

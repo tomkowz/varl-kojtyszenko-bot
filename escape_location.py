@@ -16,30 +16,45 @@ class EscapeLocation:
         mapHeight = self.battlefieldInfo.config.mapHeight - 1
         corner = random.randint(0, 3)
 
-        corners = [
-            Location(0, 0),
-            Location(mapWidth - 1, 0),
-            Location(mapWidth - 1, mapHeight - 1),
-            Location(0, mapHeight - 1)
-        ]
+        corner0 = Location(0, 0)
+        corner1 = Location(mapWidth - 1, 0)
+        corner2 = Location(mapWidth - 1, mapHeight - 1)
+        corner3 = Location(0, mapHeight - 1)
 
         iterations = min(mapWidth, mapHeight) / 2
 
         found = False
         for k in range(iterations):
             for i in range(4):
-                location = corners[i]
-                if self.nodes[location.x][location.y].metadata.isAvailable == True:
+                corner = None
+                if i == 0:
+                    corner = corner0
+                elif i == 1:
+                    corner = corner1
+                elif i == 2:
+                    corner = corner2
+                elif i == 3:
+                    corner = corner3
+
+                if self.nodes[corner.x][corner.y].metadata.isAvailable == True:
                     # Return location if found good one to escape
-                    return location
+                    return corner
                 else:
                     if i == 0:
-                        corners[0] = Location(min(max(0, location.x + 1), mapWidth), min(max(0, location.y + 1), mapHeight))
+                        x = min(max(0, corner.x + 1), mapWidth)
+                        y = min(max(0, corner.y + 1), mapHeight)
+                        corner0 = Location(x, y)
                     if i == 1:
-                        corners[1] = Location(min(max(0, location.x - 1), mapWidth), min(max(0, location.y + 1, mapHeight)))
+                        x = min(max(0, corner.x - 1), mapWidth)
+                        y = min(max(0, corner.y + 1), mapHeight)
+                        corner1 = Location(x, y)
                     if i == 2:
-                        corners[2] = Location(min(max(0, location.x - 1), mapWidth), min(max(0, location.y - 1, mapHeight)))
+                        x = min(max(0, corner.x - 1), mapWidth)
+                        y = min(max(0, corner.y - 1), mapHeight)
+                        corner2 = Location(x, y)
                     if i == 3:
-                        corners[3] = Location(min(max(0, location.x + 1), mapWidth), min(max(0, location.y - 1, mapHeight)))   
+                        x = min(max(0, corner.x + 1), mapWidth)
+                        y = min(max(0, corner.y - 1), mapHeight)
+                        corner3 = Location(x, y)   
 
         return None

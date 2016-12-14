@@ -11,9 +11,9 @@ class InfoHandler(tornado.web.RequestHandler):
 
     def get(self):
         response = {
-            'Name': 'tomkowz',
+            'Name': 'Varl Kojtyszenko',
             'AvatarUrl': 'http://szulctomasz.com/avatars/avatar-3-300-300.png',
-            'Description': r'- Jaki przedmiot szkolny najmniej przydaje się w życiu? - Kanapka.',
+            'Description': r'- Jaki przedmiot szkolny najmniej przydaje się w życiu? - Kremówka.',
             'GameType': 'TankBlaster'
         }
         self.write(json.dumps(response))
