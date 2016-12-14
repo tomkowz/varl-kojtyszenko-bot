@@ -10,7 +10,7 @@ class BotParser:
     def get_bot(data):
         pos = get_location_from_string(data['BotLocation'])
         location = Location(pos[0], pos[1])
-        isMissileAvailable = bool(data['IsMissileAvailable'])
+        isMissileAvailable = bool(data['MissileAvailableIn'])
         bot = Bot(location, isMissileAvailable)
         bot.print_debug()
         return bot

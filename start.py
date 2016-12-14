@@ -7,7 +7,7 @@ from ping_handler import PingHandler
 
 application = tornado.web.Application([
     (r"/", PingHandler),
-    (r"/Info", InfoHandler),
+    (r"/info", InfoHandler),
     (r"/PerformNextMove", PerformNextMoveHandler)
 ])
 

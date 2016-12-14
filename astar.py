@@ -86,6 +86,8 @@ class AStar:
 
         self._print_debug()
 
+        return (shortestPath, self.nodes)
+
     def _calculate_shortest_path(self):
         # Create first node and mark it as unvisited
         startNode = self.nodes[self.startLocation.x][self.startLocation.y]

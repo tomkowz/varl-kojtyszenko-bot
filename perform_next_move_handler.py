@@ -22,7 +22,7 @@ from game_info_parser import GameInfoParser
 from missile import Missile
 from missile_parser import MissileParser
 from move_direction import MoveDirection
-from next_move import NextMove
+from next_move import NextMove, NextMoveInfo
 from opponent import Opponent
 from opponent_parser import OpponentParser
 
@@ -45,12 +45,13 @@ class PerformNextMoveHandler(tornado.web.RequestHandler):
 
         battlefieldInfo = BattlefieldInfo(bot, tiles, opponents, bombs, missiles, config)
         nextMove = NextMove(gameInfo, battlefieldInfo)
-        botMove = nextMove.calculate()
+        nextMoveInfo = nextMove.calculate()
         print '------'
+
         battlefieldInfo.print_board()
         print '>>>>>>'
 
-        response = BotMoveEncoder.encode(botMove)
+        response = BotMoveEncoder.encode(nextMoveInfo.botMove)
         self.write(response)
 
     def _calculate_next_move(self):
