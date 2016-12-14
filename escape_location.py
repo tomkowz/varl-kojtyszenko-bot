@@ -23,7 +23,7 @@ class EscapeLocation:
             Location(0, mapHeight - 1)
         ]
 
-        iterations = min(mapWidth, mapHeight)
+        iterations = min(mapWidth, mapHeight) / 2
 
         found = False
         for k in range(iterations):
